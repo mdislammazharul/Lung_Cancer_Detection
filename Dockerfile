@@ -17,9 +17,7 @@ RUN pip install --no-cache-dir -r /app/backend/requirements-backend.txt
 # copy source code + backend + artifacts (model must exist!)
 COPY src /app/src
 COPY backend /app/backend
-COPY artifacts /app/artifacts
-COPY .env /app/.env
 
 EXPOSE 8000
 
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
