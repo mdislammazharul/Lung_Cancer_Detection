@@ -7,3 +7,4 @@ tensorflow
 keras
 numpy<2.0
 pydantic
+huggingface_hub

@@ -7,15 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.inference import LungCancerPredictor
 from src.lung_cancer.utils import setup_logging
+from backend.model_loader import ensure_model_files
 
 logger = setup_logging("api")
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-MODEL_VERSION = os.getenv("MODEL_VERSION", "v1")
+MODEL_PATH, CLASSES_PATH = ensure_model_files()
 IMG_SIZE = int(os.getenv("IMG_SIZE", "256"))
-
-MODEL_PATH = os.getenv("MODEL_PATH", f"artifacts/models/{MODEL_VERSION}/lung_cnn.keras")
-CLASSES_PATH = os.getenv("CLASSES_PATH", f"artifacts/models/{MODEL_VERSION}/classes.json")
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
 
