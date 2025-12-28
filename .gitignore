@@ -1,0 +1,25 @@
+# python
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# data/artifacts
+data/raw/
+data/processed/
+*.zip
+
+# model
+artifacts/models/v1/lung_cnn.keras
+
+# node
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db

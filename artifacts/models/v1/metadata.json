@@ -1,0 +1,9 @@
+{
+  "model_version": "v1",
+  "img_size": 256,
+  "epochs": 10,
+  "batch_size": 64,
+  "split": 0.2,
+  "seed": 2022,
+  "saved_at_utc": "2025-12-28T10:53:14.466210Z"
+}

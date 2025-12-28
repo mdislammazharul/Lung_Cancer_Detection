@@ -1,0 +1,17 @@
+numpy
+pandas
+matplotlib
+scikit-learn
+opencv-python
+pillow
+
+tensorflow
+keras
+
+fastapi
+uvicorn[standard]
+python-multipart
+
+pydantic
+requests
+python-dotenv
