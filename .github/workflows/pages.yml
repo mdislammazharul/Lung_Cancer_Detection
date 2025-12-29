@@ -39,10 +39,16 @@ jobs:
           VITE_GRADIO_FN_INDEX: "2"
         run: npm run build
 
+      - name: Normalize dist (fix perms / symlinks)
+        run: |
+          rm -rf public
+          mkdir -p public
+          cp -R --dereference --no-preserve=mode,ownership frontend/dist/* public/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/dist
+          path: public
 
   deploy:
     needs: build
