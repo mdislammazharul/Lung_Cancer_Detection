@@ -28,13 +28,29 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install
         working-directory: frontend
         run: npm ci
 
-      - name: Install backend deps
-        working-directory: backend
-        run: pip install -r requirements-backend.txt
+      - name: Debug Python & pip
+        run: |
+          which python
+          python -V
+          python -m pip -V
+          python -c "import sys; print(sys.executable)"
+
+      - name: Install backend deps (explicit)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r backend/requirements-backend.txt
+          python -m pip list | grep -E "huggingface|tensorflow|keras|fastapi" || true
+          python -m pip show huggingface_hub || true
+          python -c "import huggingface_hub; print('huggingface_hub OK', huggingface_hub.__version__)"
 
       - name: Backend import smoke test
         run: python -c "from backend.main import app; print('FastAPI import OK')"

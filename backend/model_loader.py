@@ -1,14 +1,8 @@
 import os
 from pathlib import Path
-from huggingface_hub import hf_hub_download
 
 def ensure_model_files() -> tuple[str, str]:
-    """
-    Downloads model + classes from Hugging Face if not present locally.
-    Returns (model_path, classes_path).
-    """
-
-    model_repo = os.getenv("HF_MODEL_REPO", "")  # e.g. "mdislammazharul/lung-cancer-cnn-v1"
+    model_repo = os.getenv("HF_MODEL_REPO", "")
     model_file = os.getenv("HF_MODEL_FILE", "lung_cnn.h5")
     classes_file = os.getenv("HF_CLASSES_FILE", "classes.json")
 
@@ -18,19 +12,19 @@ def ensure_model_files() -> tuple[str, str]:
     local_model = local_dir / model_file
     local_classes = local_dir / classes_file
 
-    # If repo not set, assume files are already baked into image
+    # If repo not set, require local files (no HF dependency needed)
     if not model_repo:
         if not local_model.exists() or not local_classes.exists():
             raise FileNotFoundError(
-                "Model files not found and HF_MODEL_REPO is not set. "
-                "Either bake artifacts into Docker image or set HF_MODEL_REPO env var."
+                "Model files not found and HF_MODEL_REPO is not set."
             )
         return str(local_model), str(local_classes)
 
-    # Download if missing
+    # ✅ Import only when we actually need HF download
+    from huggingface_hub import hf_hub_download  # lazy import
+
     if not local_model.exists():
         p = hf_hub_download(repo_id=model_repo, filename=model_file, local_dir=str(local_dir))
-        # hf_hub_download may store in subfolders; ensure direct path exists
         if not local_model.exists():
             Path(p).rename(local_model)
 
