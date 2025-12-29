@@ -9,7 +9,7 @@ def ensure_model_files() -> tuple[str, str]:
     """
 
     model_repo = os.getenv("HF_MODEL_REPO", "")  # e.g. "mdislammazharul/lung-cancer-cnn-v1"
-    model_file = os.getenv("HF_MODEL_FILE", "lung_cnn.keras")
+    model_file = os.getenv("HF_MODEL_FILE", "lung_cnn.h5")
     classes_file = os.getenv("HF_CLASSES_FILE", "classes.json")
 
     local_dir = Path(os.getenv("MODEL_DIR", "artifacts/models/v1"))
