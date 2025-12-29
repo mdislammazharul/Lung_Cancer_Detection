@@ -16,6 +16,9 @@ data/processed/
 # model
 artifacts/models/v1/lung_cnn.keras
 
+# docs
+docs
+
 # node
 frontend/node_modules/
 frontend/dist/
