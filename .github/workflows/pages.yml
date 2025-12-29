@@ -33,7 +33,11 @@ jobs:
         run: npm ci
 
       - name: Install backend deps
+        working-directory: backend
         run: pip install -r requirements-backend.txt
+
+      - name: Backend import smoke test
+        run: python -c "from backend.main import app; print('FastAPI import OK')"
 
       - name: Build
         working-directory: frontend
