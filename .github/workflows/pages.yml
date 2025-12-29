@@ -32,6 +32,9 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Install backend deps
+        run: pip install -r requirements-backend.txt
+
       - name: Build
         working-directory: frontend
         env:
