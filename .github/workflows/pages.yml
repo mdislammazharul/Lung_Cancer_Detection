@@ -53,7 +53,10 @@ jobs:
           python -c "import huggingface_hub; print('huggingface_hub OK', huggingface_hub.__version__)"
 
       - name: Backend import smoke test
+        env:
+          SKIP_MODEL_LOAD: "1"
         run: python -c "from backend.main import app; print('FastAPI import OK')"
+
 
       - name: Build
         working-directory: frontend
