@@ -3,74 +3,74 @@ import { motion } from "framer-motion";
 import {
   Activity,
   Boxes,
-  Cpu,
   Database,
-  FlaskConical,
   Github,
-  Globe,
   Image as ImageIcon,
-  Layers,
   PlayCircle,
   Rocket,
-  ShieldCheck,
   Terminal,
   Upload,
+  Globe,
 } from "lucide-react";
 
-import { predictViaFastAPI } from "./lungSpaceApi";
+import ModelPerformance from "./components/ModelPerformance";
+import PredictionResult from "./components/PredictionResult";
+import { predictFromSpace } from "./lungSpaceApi";
+
+function HFLogo({ className = "h-4 w-4" }) {
+  // Put your logo at: frontend/public/logos/huggingface.svg (or .png)
+  return (
+    <img
+      src={`${import.meta.env.BASE_URL}logos/huggingface.svg`}
+      alt="Hugging Face"
+      className={className}
+    />
+  );
+}
 
 const LINKS = {
   live: "https://mdislammazharul.github.io/Lung_Cancer_Detection/",
   repo: "https://github.com/mdislammazharul/Lung_Cancer_Detection",
   docker: "https://hub.docker.com/r/mdislammazharul/lung-cancer-api",
+  hfSpace: "https://huggingface.co/spaces/mdislammazharul/Lung_Cancer_Detection_HF_Space",
 };
 
-const Section = ({ id, title, subtitle, icon: Icon, children }) => (
-  <motion.section
-    id={id}
-    initial={{ opacity: 0, y: 16 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.2 }}
-    transition={{ duration: 0.45, ease: "easeOut" }}
-    className="mt-12"
-  >
-    <div className="flex items-start gap-3">
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-        <Icon className="h-5 w-5 text-emerald-600" />
-      </div>
-      <div>
-        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-        {subtitle ? <p className="mt-1 text-sm text-slate-600">{subtitle}</p> : null}
-      </div>
-    </div>
-    <div className="mt-4">{children}</div>
-  </motion.section>
-);
+function Badge({ children, className = "" }) {
+  return (
+    <span
+      className={
+        "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium " +
+        className
+      }
+    >
+      {children}
+    </span>
+  );
+}
 
-const Card = ({ title, icon: Icon, children, accent = false }) => (
-  <div
-    className={[
-      "rounded-2xl border bg-white p-5 shadow-sm",
-      accent ? "border-emerald-200/70 ring-1 ring-emerald-100" : "border-slate-200",
-    ].join(" ")}
-  >
-    <div className="mb-3 flex items-center gap-2">
-      {Icon ? <Icon className="h-4 w-4 text-indigo-600" /> : null}
-      <div className="text-sm font-semibold text-slate-800">{title}</div>
-    </div>
-    {children}
-  </div>
-);
-
-const Metric = ({ label, value, icon: Icon }) => (
-  <div className="rounded-xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-4">
-    <div className="flex items-center justify-between">
-      <div className="text-xs font-medium text-slate-600">{label}</div>
-      {Icon ? <Icon className="h-4 w-4 text-emerald-600" /> : null}
-    </div>
-    <div className="mt-1 text-2xl font-semibold text-slate-900">{value}</div>
-  </div>
-);
+function Section({ id, title, subtitle, icon: Icon, children }) {
+  return (
+    <motion.section
+      id={id}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className="mt-12"
+    >
+      <div className="flex items-start gap-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <Icon className="h-5 w-5 text-emerald-600" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+          {subtitle ? <p className="mt-1 text-sm text-slate-600">{subtitle}</p> : null}
+        </div>
+      </div>
+      <div className="mt-4">{children}</div>
+    </motion.section>
+  );
+}
 
 export default function App() {
   // ------- Dataset samples (served from frontend/public/sample_requests/) -------
@@ -79,7 +79,6 @@ export default function App() {
   const [sampleUrl, setSampleUrl] = useState("");
 
   useEffect(() => {
-    // expects: frontend/public/sample_requests/index.json (array of filenames)
     fetch(`${import.meta.env.BASE_URL}sample_requests/index.json`)
       .then((r) => (r.ok ? r.json() : []))
       .then((arr) => {
@@ -88,10 +87,7 @@ export default function App() {
           if (arr.length > 0) setSampleSelected(arr[0]);
         }
       })
-      .catch(() => {
-        // Optional feature: if not present, silently ignore
-        setSampleList([]);
-      });
+      .catch(() => setSampleList([]));
   }, []);
 
   useEffect(() => {
@@ -99,7 +95,7 @@ export default function App() {
     setSampleUrl(`${import.meta.env.BASE_URL}sample_requests/${sampleSelected}`);
   }, [sampleSelected]);
 
-  // ------- Try Prediction widget -------
+  // ------- Try Prediction widget (Hugging Face Space) -------
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
@@ -121,7 +117,7 @@ export default function App() {
       setLoading(true);
       setErr("");
       setResult(null);
-      const out = await predictViaFastAPI(file);
+      const out = await predictFromSpace(file); // <--- ALWAYS HF SPACE
       setResult(out);
     } catch (e) {
       setErr(e?.message || String(e));
@@ -141,6 +137,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(1000px_600px_at_20%_0%,rgba(16,185,129,0.12),transparent_60%),radial-gradient(900px_500px_at_80%_10%,rgba(99,102,241,0.12),transparent_55%)]">
+      {/* Add more padding on large screens */}
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-12 xl:px-20">
         {/* HERO */}
         <motion.div
@@ -151,15 +148,15 @@ export default function App() {
         >
           <div className="lg:col-span-7">
             <div className="mb-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-                <Layers className="h-4 w-4" /> END-TO-END ML
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-                <ShieldCheck className="h-4 w-4" /> FASTAPI + DOCKER
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium text-slate-700">
-                <Globe className="h-4 w-4" /> REACT + GITHUB PAGES
-              </span>
+              <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                <Boxes className="h-4 w-4" /> END-TO-END ML
+              </Badge>
+              <Badge className="border-indigo-200 bg-indigo-50 text-indigo-700">
+                <Terminal className="h-4 w-4" /> FASTAPI + DOCKER
+              </Badge>
+              <Badge className="border-amber-200 bg-amber-50 text-amber-800">
+                <HFLogo className="h-4 w-4" /> HUGGING FACE SPACE
+              </Badge>
             </div>
 
             <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
@@ -170,18 +167,16 @@ export default function App() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
-              Train a CNN on histopathology images, export versioned artifacts, serve predictions via FastAPI,
+              Train a CNN on histopathology images, export versioned artifacts, serve predictions via an inference API,
               containerize with Docker, and deploy a frontend to GitHub Pages.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
-                href={LINKS.live}
-                target="_blank"
-                rel="noreferrer"
+                href={`${import.meta.env.BASE_URL}predict`}
               >
-                <Rocket className="h-4 w-4" /> Open Live Site
+                <Rocket className="h-4 w-4" /> Live Prediction
               </a>
               <a
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
@@ -192,6 +187,14 @@ export default function App() {
                 <Github className="h-4 w-4" /> View Source
               </a>
               <a
+                className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100"
+                href={LINKS.hfSpace}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Globe className="h-4 w-4" /> Open HF Space
+              </a>
+              <a
                 className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
                 href={LINKS.docker}
                 target="_blank"
@@ -199,145 +202,15 @@ export default function App() {
               >
                 <Boxes className="h-4 w-4" /> Docker Hub Image
               </a>
-            </div>
-
-            {/* Try Prediction (embedded) */}
-            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <PlayCircle className="h-5 w-5 text-emerald-600" />
-                  <div className="text-sm font-semibold text-slate-900">Try Prediction</div>
-                </div>
-                <div className="text-xs text-slate-500">FastAPI (VITE_API_BASE)</div>
-              </div>
-
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <label className="text-xs font-medium text-slate-600">Upload histopathology image</label>
-                  <div className="mt-2 flex flex-wrap items-center gap-3">
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50">
-                      <Upload className="h-4 w-4" />
-                      Choose File
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                      />
-                    </label>
-                    <button
-                      className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-                      onClick={onPredict}
-                      disabled={!file || loading}
-                    >
-                      <Terminal className="h-4 w-4" />
-                      {loading ? "Predicting..." : "Predict"}
-                    </button>
-                  </div>
-
-                  <div className="mt-3 text-xs text-slate-600">
-                    {file ? (
-                      <span className="inline-flex items-center gap-2">
-                        <ImageIcon className="h-4 w-4 text-indigo-600" />
-                        {file.name}
-                      </span>
-                    ) : (
-                      "No file selected."
-                    )}
-                  </div>
-
-                  {err ? (
-                    <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-                      {err}
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <div className="text-xs font-medium text-slate-600">Preview / Result</div>
-
-                  <div className="mt-2 grid gap-3">
-                    <div className="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                      {preview ? (
-                        <img src={preview} alt="preview" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-slate-500">
-                          Upload an image to preview it here.
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                      <div className="text-xs font-semibold text-slate-700">API output</div>
-                      <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-white p-2 text-xs text-slate-800">
-                        {result ? JSON.stringify(result, null, 2) : "No prediction yet."}
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 text-xs text-slate-500">
-                Tip: run backend locally via Docker Hub image and keep VITE_API_BASE=http://localhost:8000
-              </div>
-            </div>
+            </div>            
           </div>
-
-          {/* PERFORMANCE */}
+          {/* PERFORMANCE (new nicer component) */}
           <div className="lg:col-span-5">
-            <Card title="Model Performance (Test Set)" icon={Activity} accent>
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <Metric label="Accuracy" value="0.90" icon={ShieldCheck} />
-                <Metric label="Macro F1" value="0.90" icon={Cpu} />
-                <Metric label="Weighted F1" value="0.90" icon={FlaskConical} />
-              </div>
-              <div className="mt-4 rounded-xl border border-emerald-200/60 bg-emerald-50 p-4">
-                <div className="text-xs font-semibold text-emerald-900">Key takeaway</div>
-                <p className="mt-1 text-sm text-emerald-900/80">
-                  Normal tissue is classified extremely well (F1 0.98). Adenocarcinoma has lower recall (0.76),
-                  while squamous cell carcinoma has very high recall (0.98) with more false positives.
-                </p>
-              </div>
-            </Card>
+            <ModelPerformance />
           </div>
         </motion.div>
 
-        {/* TECH ARCH */}
-        <Section
-          id="architecture"
-          title="Technical Architecture"
-          subtitle="Training produces versioned artifacts; backend serves inference; frontend consumes the API and is deployed to GitHub Pages."
-          icon={Boxes}
-        >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card title="Training (Python)" icon={FlaskConical}>
-              <div className="text-sm text-slate-600">
-                Training pipeline in <span className="font-medium text-slate-900">src/lung_cancer</span> exports artifacts to{" "}
-                <span className="font-medium text-slate-900">artifacts/models/v1</span>.
-              </div>
-            </Card>
-            <Card title="Artifacts (Versioned)" icon={Database}>
-              <div className="text-sm text-slate-600">
-                Model + metadata: <span className="font-medium text-slate-900">lung_cnn.keras</span>,{" "}
-                <span className="font-medium text-slate-900">classes.json</span>,{" "}
-                <span className="font-medium text-slate-900">metadata.json</span>.
-              </div>
-            </Card>
-            <Card title="FastAPI Backend" icon={Cpu}>
-              <div className="text-sm text-slate-600">
-                Inference API in <span className="font-medium text-slate-900">backend/</span>, served via Uvicorn on port{" "}
-                <span className="font-medium text-slate-900">8000</span>.
-              </div>
-            </Card>
-            <Card title="Docker + Deploy" icon={Rocket}>
-              <div className="text-sm text-slate-600">
-                Backend containerized (Dockerfile). Frontend deployed via GitHub Actions Pages workflow.
-              </div>
-            </Card>
-          </div>
-        </Section>
-
-        {/* DATASET PREVIEW + REAL SAMPLE LOADER */}
+        {/* DATASET PREVIEW */}
         <Section
           id="dataset"
           title="Dataset Preview"
@@ -345,77 +218,66 @@ export default function App() {
           icon={Database}
         >
           <div className="grid gap-4 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800">
-                  Sample requests (served statically)
-                </div>
-                <div className="p-4">
-                  {sampleList.length === 0 ? (
-                    <div className="text-sm text-slate-600">
-                      No samples found. To enable this feature:
-                      <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
-                        1) Copy data/sample_requests/* → frontend/public/sample_requests/<br />
-                        2) Create frontend/public/sample_requests/index.json with filenames
-                      </div>
+            <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800">
+                Sample requests
+              </div>
+              <div className="p-4">
+                {sampleList.length === 0 ? (
+                  <div className="text-sm text-slate-600">
+                    No samples found. To enable:
+                    <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
+                      1) Copy data/sample_requests/* → frontend/public/sample_requests/<br />
+                      2) Create frontend/public/sample_requests/index.json with filenames
                     </div>
-                  ) : (
-                    <>
-                      <label className="text-xs font-medium text-slate-600">Choose a sample</label>
-                      <select
-                        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                        value={sampleSelected}
-                        onChange={(e) => setSampleSelected(e.target.value)}
-                      >
-                        {sampleList.map((name) => (
-                          <option key={name} value={name}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
+                  </div>
+                ) : (
+                  <>
+                    <label className="text-xs font-medium text-slate-600">Choose a sample</label>
+                    <select
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                      value={sampleSelected}
+                      onChange={(e) => setSampleSelected(e.target.value)}
+                    >
+                      {sampleList.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
 
-                      <div className="mt-4 aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                        {sampleUrl ? (
-                          <img src={sampleUrl} alt="sample" className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-xs text-slate-500">
-                            Select a sample to preview.
-                          </div>
-                        )}
-                      </div>
+                    <div className="mt-4 aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                      {sampleUrl ? (
+                        <img src={sampleUrl} alt="sample" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs text-slate-500">
+                          Select a sample to preview.
+                        </div>
+                      )}
+                    </div>
 
-                      <div className="mt-3 text-xs text-slate-500">
-                        Loaded from: <span className="font-mono">{`/sample_requests/${sampleSelected}`}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
+                    <div className="mt-3 text-xs text-slate-500">
+                      Loaded from: <span className="font-mono">{`/sample_requests/${sampleSelected}`}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            <Card title="Dataset notes" icon={FlaskConical}>
-              <div className="text-sm text-slate-600">
-                Kaggle histopathology dataset with 3 classes:
-                <div className="mt-3 grid gap-2">
-                  <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-800">
-                    lung_aca (adenocarcinoma)
-                  </div>
-                  <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-800">
-                    lung_scc (squamous cell)
-                  </div>
-                  <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-800">
-                    lung_n (normal)
-                  </div>
-                </div>
-                <div className="mt-3 text-xs text-slate-500">
-                  Local path: <span className="font-mono">data/raw/lung_colon_image_set/lung_image_sets/</span>
-                </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="text-sm font-semibold text-slate-800">Dataset notes</div>
+              <p className="mt-2 text-sm text-slate-600">
+                Kaggle histopathology dataset with 3 classes: lung_aca (adenocarcinoma), lung_scc (squamous cell),
+                lung_n (normal).
+              </p>
+              <div className="mt-3 text-xs text-slate-500">
+                Local path: <span className="font-mono">data/raw/lung_colon_image_set/lung_image_sets/</span>
               </div>
-            </Card>
+            </div>
           </div>
         </Section>
 
-        {/* EVALUATION */}
+        {/* MODEL EVALUATION TABLE */}
         <Section
           id="evaluation"
           title="Model Evaluation"

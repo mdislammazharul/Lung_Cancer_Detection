@@ -1,13 +1,24 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>frontend</title>
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-  </body>
+</body>
+<script>
+    // Restore SPA route from ?p=
+    const params = new URLSearchParams(location.search);
+    const p = params.get("p");
+    if (p) {
+        history.replaceState(null, "", `${import.meta.env.BASE_URL}${p}`);
+    }
+</script>
+
 </html>
