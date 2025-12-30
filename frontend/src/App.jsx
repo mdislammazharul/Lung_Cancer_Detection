@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 
 import ModelPerformance from "./components/ModelPerformance";
-import PredictionResult from "./components/PredictionResult";
 import { predictFromSpace } from "./lungSpaceApi";
+import { Link } from "react-router-dom";
 
 function HFLogo({ className = "h-4 w-4" }) {
   // Put your logo at: frontend/public/logos/huggingface.svg (or .png)
