@@ -266,6 +266,9 @@ export default function App() {
                     <li>
                     <span className="font-medium text-slate-800">Large model handling</span> (&gt;100MB) using Git LFS and Hugging Face Hub
                     </li>
+                    <li>
+                    <span className="font-medium text-slate-800">More details:</span> <a href="https://mdislammazharul.github.io/posts/2025-12-30-Full_Stack_Lung_Cancer_Detection.md">Lung Cancer Detection (CNN) — End-to-End ML + Web Deployment</a>
+                    </li>
                 </ul>
               </div>
             </div>            
