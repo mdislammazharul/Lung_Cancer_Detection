@@ -38,13 +38,13 @@ export default function ModelPerformance() {
       badge: "Best Model Selected",
       metrics: [
         { label: "Accuracy", value: "90.0%", icon: Target, tone: "indigo" },
-        { label: "Macro F1", value: "0.90", icon: BarChart2, tone: "emerald" },
-        { label: "Weighted F1", value: "0.90", icon: CheckCircle, tone: "teal" },
+        { label: "Macro FNR", value: "9.7%", icon: BarChart2, tone: "emerald" },
+        { label: "Error Rate", value: "10%", icon: CheckCircle, tone: "teal" },
       ],
       // Fill these with your real hyperparams. If you don’t have them, keep reasonable defaults.
       bestParams: {
-        img_size: "224x244",
-        batch_size: 32,
+        img_size: "256x256",
+        batch_size: 64,
         epochs: 10,
         optimizer: "Adam",
         learning_rate: 0.0001,
