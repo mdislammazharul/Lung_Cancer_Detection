@@ -6,10 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Redirecting…</title>
     <script>
-        // GitHub Pages SPA redirect
-        const base = "/Lung_Cancer_Detection/";
-        const path = location.pathname.replace(base, "");
-        location.replace(base + "?p=" + encodeURIComponent(path));
+        // GitHub Pages SPA redirect (for /Lung_Cancer_Detection/)
+        var base = "/Lung_Cancer_Detection";
+        var path = location.pathname;
+
+        // strip base from path (e.g. /Lung_Cancer_Detection/predict -> /predict)
+        if (path.indexOf(base) === 0) path = path.slice(base.length);
+        if (!path.startsWith("/")) path = "/" + path;
+
+        // preserve query/hash if needed (optional)
+        var query = location.search || "";
+        var hash = location.hash || "";
+
+        location.replace(base + "/?p=" + encodeURIComponent(path + query + hash));
     </script>
 </head>
 

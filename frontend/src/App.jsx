@@ -172,12 +172,12 @@ export default function App() {
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <a
+              <Link
+                to="/predict"
                 className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
-                href={`${import.meta.env.BASE_URL}predict`}
-              >
+                >
                 <Rocket className="h-4 w-4" /> Live Prediction
-              </a>
+              </Link>
               <a
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                 href={LINKS.repo}
