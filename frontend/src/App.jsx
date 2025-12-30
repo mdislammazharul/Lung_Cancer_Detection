@@ -4,13 +4,15 @@ import {
   Activity,
   Boxes,
   Database,
-  Github,
   Image as ImageIcon,
   PlayCircle,
   Rocket,
   Terminal,
   Upload,
   Globe,
+  Container, 
+  Code2,
+  Github
 } from "lucide-react";
 
 import ModelPerformance from "./components/ModelPerformance";
@@ -71,6 +73,23 @@ function Section({ id, title, subtitle, icon: Icon, children }) {
     </motion.section>
   );
 }
+
+function CodeBlock({ title = "BASH", code }) {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="rounded-lg bg-white/10 px-2 py-1 text-xs font-semibold text-slate-200">
+            {title}
+          </span>
+        </div>
+        <div className="max-w-full overflow-x-auto rounded-xl bg-black/30 p-3">
+          <pre className="min-w-max whitespace-pre text-xs leading-relaxed text-slate-100">
+            {code}
+          </pre>
+        </div>
+      </div>
+    );
+  }
 
 export default function App() {
   // ------- Dataset samples (served from frontend/public/sample_requests/) -------
@@ -284,7 +303,7 @@ export default function App() {
           subtitle="Classification report on the held-out test set (support totals 3000)."
           icon={Activity}
         >
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
             <table className="min-w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                 <tr>
@@ -317,49 +336,72 @@ export default function App() {
           </div>
         </Section>
 
-        {/* REPRODUCE */}
-        <Section
-          id="reproduce"
-          title="How to Reproduce"
-          subtitle="Fastest path: pull Docker Hub image and run the API locally. Then run the frontend."
-          icon={Terminal}
-        >
-          <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 p-6 text-white shadow-lg">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Terminal className="h-5 w-5 text-emerald-300" />
-                <div className="text-lg font-bold">Reproduction Commands</div>
-              </div>
-              <a className="text-sm text-slate-200 underline" href={LINKS.repo} target="_blank" rel="noreferrer">
-                View Source on GitHub
-              </a>
+        {/* Reproduction / DevOps Section (same style as your example) */}
+        <section className="mt-16 bg-slate-900 rounded-3xl p-8 md:p-12 text-slate-300 overflow-hidden relative shadow-2xl">
+        <div className="absolute right-0 top-0 p-12 opacity-5">
+            <Github size={200} />
+        </div>
+
+        <div className="relative z-10">
+            <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <h2 className="flex items-center gap-3 text-2xl font-bold text-white">
+                <Terminal className="text-teal-400" /> How to Reproduce
+            </h2>
+
+            <a
+                href={LINKS.repo}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-sm text-teal-400 hover:text-teal-300 hover:underline"
+            >
+                <Github size={16} />
+                View Source on GitHub →
+            </a>
             </div>
 
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
-                <div className="text-sm font-semibold">Using Docker Hub (fastest)</div>
-                <pre className="mt-3 overflow-x-auto rounded-xl bg-black/30 p-3 text-xs text-slate-100">
-{`docker pull mdislammazharul/lung-cancer-api:latest
-docker run --rm -p 8000:8000 mdislammazharul/lung-cancer-api:latest`}
-                </pre>
-                <div className="mt-2 text-xs text-slate-200">API docs: http://localhost:8000/docs</div>
-              </div>
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+            {/* Using Docker Hub (fastest) */}
+            <div>
+                <h3 className="mb-2 flex items-center gap-2 font-semibold text-white">
+                <Container size={16} /> Using Docker Hub (fastest)
+                </h3>
+                <p className="mb-3 text-sm text-slate-400">
+                Pull the published image and run the container exposing port 8000.
+                </p>
 
-              <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
-                <div className="text-sm font-semibold">Frontend (local dev)</div>
-                <pre className="mt-3 overflow-x-auto rounded-xl bg-black/30 p-3 text-xs text-slate-100">
-{`cd frontend
-npm install
-# set frontend/.env -> VITE_API_BASE=http://localhost:8000
-npm run dev`}
-                </pre>
-                <div className="mt-2 text-xs text-slate-200">
-                  If deploying to GitHub Pages, keep Vite base path configured.
-                </div>
-              </div>
+                <CodeBlock
+                title="BASH"
+                code={`# Pull Docker image 
+    docker pull mdislammazharul/lung-cancer-api:latest
+    docker run --rm -p 8000:8000 mdislammazharul/lung-cancer-api:latest`}
+                />
             </div>
-          </div>
-        </Section>
+
+            {/* Local Development (frontend + optional backend) */}
+            <div>
+                <h3 className="mb-2 flex items-center gap-2 font-semibold text-white">
+                <Code2 size={16} /> Local Development
+                </h3>
+                <p className="mb-3 text-sm text-slate-400">
+                Start the backend (optional) and run the Vite frontend locally.
+                </p>
+
+                <CodeBlock
+                title="BASH"
+                code={`# (Optional) Backend API
+    cd backend
+    pip install -r requirements-backend.txt
+    uvicorn main:app --reload --port 8000
+
+# Frontend
+    cd ../frontend
+    npm install
+    npm run dev`}
+                />
+            </div>
+            </div>
+        </div>
+        </section>
 
         <div className="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-500">
           © {new Date().getFullYear()} Lung Cancer Detection — FastAPI, Docker, React, Tailwind, GitHub Pages.
