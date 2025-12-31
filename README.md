@@ -2,6 +2,8 @@
 
 **Live site:** https://mdislammazharul.github.io/Lung_Cancer_Detection/
 
+**More details:** https://mdislammazharul.github.io/posts/2025-12-30-Full_Stack_Lung_Cancer_Detection.md/
+
 A complete, production-style **end-to-end** machine learning project that trains a **Convolutional Neural Network (CNN)** to classify lung histopathology images into three categories and ships it as a working web application:
 
 - **Model training** (TensorFlow/Keras)
