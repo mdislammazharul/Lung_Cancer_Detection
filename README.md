@@ -19,6 +19,7 @@ A complete, production-style **end-to-end** machine learning project that trains
 
 - [Project Overview](#project-overview)
 - [Dataset](#dataset)
+- [Exploratory Data Analysis (EDA)](#exploratory-data-analysis-eda)
 - [Tech Stack](#tech-stack)
 - [Model](#model)
 - [Training Pipeline](#training-pipeline)
@@ -73,6 +74,150 @@ lung_aca/
 lung_scc/
 ...
 ````
+
+---
+
+## Exploratory Data Analysis (EDA)
+
+A structured Exploratory Data Analysis (EDA) was conducted to understand the dataset composition, image quality, and visual separability of lung tissue classes.  
+This analysis helps explain the model’s behavior and guides architectural and regularization decisions.
+
+All EDA scripts are available under the `notebooks/` directory, and generated figures are stored in `figures/`.
+
+---
+
+### 1. Class Distribution
+
+![Class Distribution](figures/eda_01_class_distribution.png)
+
+**Observation**
+- The dataset is approximately balanced across the three lung tissue classes:
+  - `lung_n` (Normal)
+  - `lung_aca` (Adenocarcinoma)
+  - `lung_scc` (Squamous Cell Carcinoma)
+- This reduces the risk of bias due to class imbalance during training.
+
+---
+
+### 2. Image Resolution Analysis
+
+<p align="center">
+  <img src="figures/eda_02_height_distribution.png" width="45%" />
+  <img src="figures/eda_02_width_distribution.png" width="45%" />
+</p>
+
+**Observation**
+- Most images share a consistent resolution.
+- Uniform resizing to a fixed input size (256×256) is appropriate and does not introduce significant distortion.
+
+---
+
+### 3. Brightness and Contrast Distribution
+
+<p align="center">
+  <img src="figures/eda_02_mean_intensity.png" width="45%" />
+  <img src="figures/eda_02_std_intensity.png" width="45%" />
+</p>
+
+**Observation**
+- Brightness (mean pixel intensity) varies moderately across samples.
+- Contrast (standard deviation of pixel intensity) shows noticeable variability, which may affect feature extraction in early CNN layers.
+- This motivated normalization and regularization during training.
+
+---
+
+### 4. Visual Inspection of Class Samples
+
+#### Normal Lung Tissue (`lung_n`)
+![Normal Samples](figures/eda_03_samples_lung_n.png)
+
+#### Lung Adenocarcinoma (`lung_aca`)
+![Adenocarcinoma Samples](figures/eda_03_samples_lung_aca.png)
+
+#### Lung Squamous Cell Carcinoma (`lung_scc`)
+![Squamous Cell Carcinoma Samples](figures/eda_03_samples_lung_scc.png)
+
+**Observation**
+- Normal tissue exhibits more uniform and organized cellular structures.
+- Cancerous tissues show irregular morphology and dense cellular regions.
+- Visual overlap between adenocarcinoma and squamous cell carcinoma is evident, indicating a challenging classification boundary.
+
+---
+
+### 5. Mean Image per Class
+
+<p align="center">
+  <img src="figures/eda_03_mean_image_lung_n.png" width="30%" />
+  <img src="figures/eda_03_mean_image_lung_aca.png" width="30%" />
+  <img src="figures/eda_03_mean_image_lung_scc.png" width="30%" />
+</p>
+
+**Observation**
+- Mean images highlight global texture and color tendencies for each class.
+- Cancer classes share overlapping intensity patterns, reinforcing the need for deeper feature extraction rather than simple color-based cues.
+
+---
+
+### 6. Model Behavior Analysis (Post-Training EDA)
+
+#### Confusion Matrix
+
+![Confusion Matrix](figures/eda_04_confusion_matrix.png)
+
+**Observation**
+- The model performs strongly on `lung_n` and `lung_scc`.
+- Most misclassifications occur between `lung_aca` and `lung_scc`, consistent with their visual similarity observed during EDA.
+
+---
+
+#### Misclassified Examples
+
+![Misclassified Examples](figures/eda_04_misclassified_examples.png)
+
+**Observation**
+- Misclassified samples often exhibit ambiguous morphology or weak structural boundaries.
+- These findings explain the gap between training and validation accuracy and suggest the benefit of stronger regularization or transfer learning in future iterations.
+
+---
+
+**Conclusion from EDA**
+
+The EDA reveals that:
+- The dataset is balanced and of sufficient quality.
+- Certain cancer subtypes exhibit strong visual overlap.
+- Model confusion patterns are well-aligned with observed data characteristics.
+
+This validates the overall modeling approach while highlighting opportunities for further improvement.
+
+---
+
+---
+
+## Tech Stack
+
+### Machine Learning
+- Python 3.11
+- TensorFlow / Keras
+- NumPy
+- OpenCV (headless)
+- scikit-learn (evaluation + report)
+
+### Backend (Inference API)
+- FastAPI
+- Uvicorn
+- Pydantic
+
+### Frontend
+- React
+- Vite
+- JavaScript (Fetch API)
+
+### Deployment / MLOps
+- Docker (containerized backend)
+- GitHub Pages (frontend hosting)
+- GitHub Actions (CI/CD for pages)
+- Hugging Face Spaces
+
 ---
 
 ## Model
@@ -137,33 +282,6 @@ history = model.fit(
     callbacks=[es, lr, myCallback()]
 )
 ```
-
----
-
-## Tech Stack
-
-### Machine Learning
-- Python 3.11
-- TensorFlow / Keras
-- NumPy
-- OpenCV (headless)
-- scikit-learn (evaluation + report)
-
-### Backend (Inference API)
-- FastAPI
-- Uvicorn
-- Pydantic
-
-### Frontend
-- React
-- Vite
-- JavaScript (Fetch API)
-
-### Deployment / MLOps
-- Docker (containerized backend)
-- GitHub Pages (frontend hosting)
-- GitHub Actions (CI/CD for pages)
-- Hugging Face Spaces
 
 ---
 

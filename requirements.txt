@@ -4,6 +4,7 @@ matplotlib
 scikit-learn
 opencv-python
 pillow
+tqdm
 
 tensorflow
 keras
